@@ -1,0 +1,12 @@
+table {
+  width: 100%;
+}
+
+td.mat-cell, td.mat-footer-cell, th.mat-header-cell {
+  padding: 8px;
+
+  * img {
+    width: 5rem;
+    height: 5rem;
+  }
+}
