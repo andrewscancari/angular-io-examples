@@ -1,3 +1,4 @@
+import { HttpClient } from '@angular/common/http';
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { Observable, Subscription } from 'rxjs';
 
@@ -7,59 +8,71 @@ import { Observable, Subscription } from 'rxjs';
   styleUrls: ['./app.component.css']
 })
 export class AppComponent implements OnInit, OnDestroy {
+  constructor(
+    private httpClient: HttpClient
+  ) {}
+
   title = 'observable';
 
-  valoresRecebidos: string[] = [];
-  inscricaoObservable: Subscription;
+  public auxValues: string[] = [];
+  public deputiesList: [];
+  private timeoutSubscription: Subscription;
 
-  exemploTimeout(): Observable<string> {
-    return new Observable<string>(observador => {
+
+  timeoutExample(): Observable<string> {
+    return new Observable<string>(observable => {
       setTimeout(() => {
-        observador.next('Primeiro timeout');
+        observable.next('First timeout');
       }, 2000);
 
       setTimeout(() => {
-        observador.next('Segundo timeout');
+        observable.next('Second timeout');
 
-        // (Obs: erro finaliza o observable automaticamente)
-        // DESCOMENTE LINHA ABAIXO PARA EMITIR ERRO
-        // observador.error('Erro no observable!');
+        // Uncomment this line to simulate an error
+        // observable.error('Observable error!');
 
-        // DESCOMENTE LINHA ABAIXO PARA FINALIZAR O OBSERVABLE
-        // observador.complete();
+        // Uncomment this line to force observable to complete before next steps
+        // observable.complete();
       }, 3000);
 
       setTimeout(() => {
-        observador.next('Terceiro timeout');
+        observable.next('Third timeout');
       }, 5000);
 
       setTimeout(() => {
-        observador.next('Quarto timeout');
+        observable.next('Fourth timeout');
       }, 4000);
     });
   }
 
-  async ngOnInit() {
-    const observable = this.exemploTimeout();
+  exampleHttpDeputies(): Observable<any> {
+    const url = 'https://dadosabertos.camara.leg.br/api/v2/deputados?itens=5&ordem=ASC&ordenarPor=nome';
+    return this.httpClient.get(url);
+  }
 
-    this.inscricaoObservable = observable.subscribe(
-      sucesso => {
-        this.valoresRecebidos.push(sucesso);
+  ngOnInit() {
+    const timeoutExample = this.timeoutExample();
+
+    this.timeoutSubscription = timeoutExample.subscribe(
+      success => {
+        this.auxValues.push(success);
+        console.log(success);
       },
-      erro => {
-        this.valoresRecebidos.push(erro);
+      error => {
+        this.auxValues.push(error);
+        console.log(error);
       },
       () => {
-        this.valoresRecebidos.push('O observable foi encerrado!');
+        const auxMsg = 'Observable completed';
+        this.auxValues.push(auxMsg);
+        console.log(auxMsg);
       }
     );
-
-    console.log(this.valoresRecebidos);
   }
 
   ngOnDestroy() {
-    if (this.inscricaoObservable) {
-      this.inscricaoObservable.unsubscribe();
-   }
+    if (this.timeoutSubscription) {
+      this.timeoutSubscription.unsubscribe();
+    }
   }
 }
